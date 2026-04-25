@@ -78,7 +78,7 @@ export default function NewSession() {
       ]
     : types;
 
-  const activityEnd = addMinutes(startTime, duration);
+  const sessionEnd = addMinutes(startTime, duration);
   const dow = dayOfWeekISO(date);
   const window = availability.find((a) => a.dayOfWeek === dow);
   const availabilityWarning: { kind: "noWindow" | "outside"; message: string } | null =
@@ -87,20 +87,20 @@ export default function NewSession() {
           kind: "noWindow",
           message: `${dayLong(dow)}s are marked unavailable in your weekly hours.`,
         }
-      : startTime < window.startTime || activityEnd > window.endTime
+      : startTime < window.startTime || sessionEnd > window.endTime
         ? {
             kind: "outside",
             message: `Your ${dayLong(dow)} hours are ${formatTime12h(
               window.startTime,
-            )}–${formatTime12h(window.endTime)}; this activity runs ${formatTime12h(
+            )}–${formatTime12h(window.endTime)}; this session runs ${formatTime12h(
               startTime,
-            )}–${formatTime12h(activityEnd)}.`,
+            )}–${formatTime12h(sessionEnd)}.`,
           }
         : null;
 
   function handleSave(force = false) {
     if (!typeId) return;
-    const title = selectedType?.name ?? "Activity";
+    const title = selectedType?.name ?? "Session";
     setConflicts([]);
     createSession.mutate(
       {
@@ -114,7 +114,7 @@ export default function NewSession() {
       },
       {
         onSuccess: () => {
-          toast.success("Activity saved", {
+          toast.success("Session saved", {
             description: `${title} on ${formatDateLong(date)} at ${formatTime12h(startTime)}`,
             onPress: () =>
               router.navigate({ pathname: "/", params: { date } }),
@@ -125,7 +125,7 @@ export default function NewSession() {
           if (err instanceof ApiError && err.status === 409 && err.conflicts) {
             setConflicts(err.conflicts);
             toast.error("Time conflict", {
-              description: "This activity overlaps with an existing one.",
+              description: "This session overlaps with an existing one.",
             });
           } else {
             toast.error("Could not save", { description: err.message });
@@ -144,7 +144,7 @@ export default function NewSession() {
         <View className="bg-border rounded-full" style={{ width: 36, height: 4 }} />
       </View>
       <View className="flex-row items-center justify-between px-6 py-3">
-        <Text className="text-foreground text-2xl font-medium">New Activity</Text>
+        <Text className="text-foreground text-2xl font-medium">New Session</Text>
         <Pressable onPress={() => router.back()} hitSlop={12}>
           <Text className="text-muted-foreground text-base">Cancel</Text>
         </Pressable>
@@ -153,7 +153,7 @@ export default function NewSession() {
       <ScrollView className="flex-1" contentContainerClassName="px-6 pb-6 gap-5">
         <View className="gap-2">
           <Text className="text-foreground text-sm font-semibold">
-            Activity Type
+            Session Type
           </Text>
           <ScrollView horizontal showsHorizontalScrollIndicator={false}>
             <View className="flex-row gap-2">
@@ -340,7 +340,7 @@ export default function NewSession() {
           <TextInput
             value={notes}
             onChangeText={setNotes}
-            placeholder="Add notes about this activity..."
+            placeholder="Add notes about this session..."
             placeholderTextColorClassName="accent-muted-foreground"
             multiline
             numberOfLines={3}
@@ -413,7 +413,7 @@ export default function NewSession() {
           }}
         >
           <Text className="text-white text-base font-semibold">
-            {createSession.isPending ? "Saving..." : "Save Activity"}
+            {createSession.isPending ? "Saving..." : "Save Session"}
           </Text>
         </Pressable>
 

@@ -92,7 +92,7 @@ export default function Stats() {
         </View>
 
         <Text className="px-6 text-foreground text-sm font-semibold pb-2">
-          By Activity Type
+          By Session Type
         </Text>
         <View className="px-6 gap-3">
           {(progress?.byType ?? []).map((t) => (

@@ -5,12 +5,12 @@ booted iPhone 16e simulator via `agent-device`. Date: 2026-04-25.
 
 ## 1. Session Types
 
-Path: Settings → Activity Types
+Path: Settings → Session Types
 
 - **Create** — `+ New Type` button at top right of the section.
-- **Edit / Delete** — tapping a row opens *Edit Activity Type* with editable
+- **Edit / Delete** — tapping a row opens *Edit Session Type* with editable
   Name, Category, Priority (1–5 with Low/Mid/High labels), Color, Icon, plus
-  a red **Delete Activity Type** button.
+  a red **Delete Session Type** button.
 - **Completed count per type** — each row renders an "X logged" badge
   (Reading 4 logged, Deep Work 2 logged, etc.).
 
@@ -31,7 +31,7 @@ Path: Dashboard → `+`
 - Form prefilled with selected day, default 60-min duration.
 - Created a 9:00 AM 60-min Morning Meditation that overlapped an existing
   Reading 9–10 AM session. Result:
-  - Red toast at top: *Time conflict — This activity overlaps with an
+  - Red toast at top: *Time conflict — This session overlaps with an
     existing one.*
   - Inline warning card: *Pick a different time, or save anyway to keep the
     overlap. · Overlaps with Reading (9:00 AM–10:00 AM)* with a **Save

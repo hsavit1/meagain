@@ -106,7 +106,7 @@ export function NotificationsSheet({ visible, onClose }: Props) {
                   All caught up
                 </Text>
                 <Text className="text-muted-foreground text-xs mt-1 text-center">
-                  No overdue or upcoming activities right now.
+                  No overdue or upcoming sessions right now.
                 </Text>
               </View>
             )}

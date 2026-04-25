@@ -22,7 +22,7 @@ export default function SuggestionsScreen() {
       },
       {
         onSuccess: () => {
-          toast.success("Activity scheduled", {
+          toast.success("Session scheduled", {
             description: `${s.sessionType.name} on ${formatDateLong(s.date)} at ${formatTime12h(s.startTime)}`,
             onPress: () =>
               router.navigate({
@@ -66,7 +66,7 @@ export default function SuggestionsScreen() {
               No suggestions yet
             </Text>
             <Text className="text-muted-foreground text-sm text-center">
-              Add activity types and enable some availability windows to get
+              Add session types and enable some availability windows to get
               smart suggestions.
             </Text>
           </View>

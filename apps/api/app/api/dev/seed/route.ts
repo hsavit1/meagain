@@ -18,7 +18,7 @@ export const PERSONAS: Array<{
   {
     key: "default",
     label: "Default",
-    description: "4 activity types, mixed history, today partially scheduled",
+    description: "4 session types, mixed history, today partially scheduled",
   },
   {
     key: "empty",

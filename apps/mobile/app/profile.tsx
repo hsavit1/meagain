@@ -91,7 +91,7 @@ export default function Profile() {
                   {isConfirming && (
                     <View className="px-4 pb-3 pt-1 border-t border-border">
                       <Text className="text-warning text-xs mb-2">
-                        This deletes all current activity types, sessions, and
+                        This deletes all current session types, sessions, and
                         availability.
                       </Text>
                       <View className="flex-row gap-2">
@@ -139,7 +139,7 @@ export default function Profile() {
           <View className="bg-card border border-border rounded-2xl px-4 py-3">
             <Text className="text-muted-foreground text-xs leading-5">
               Smart Session Planner — take-home interview project. Logs
-              activities, tracks completion, and suggests time slots based on
+              sessions, tracks completion, and suggests time slots based on
               availability and spacing heuristics.
             </Text>
           </View>

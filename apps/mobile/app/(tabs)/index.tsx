@@ -143,7 +143,7 @@ export default function Dashboard() {
       },
       {
         onSuccess: () => {
-          toast.success("Activity scheduled", {
+          toast.success("Session scheduled", {
             description: `${s.sessionType.name} on ${s.date} at ${s.startTime}`,
             onPress: () =>
               router.navigate({ pathname: "/", params: { date: s.date } }),
@@ -332,7 +332,7 @@ export default function Dashboard() {
 
         <View className="mx-6 mb-5 bg-card border border-border rounded-2xl px-4 py-3 flex-row items-center gap-2">
           <Text className="text-foreground text-sm font-medium">
-            {sessions.length} {sessions.length === 1 ? "activity" : "activities"}
+            {sessions.length} {sessions.length === 1 ? "session" : "sessions"}
           </Text>
           <Text className="text-muted-foreground text-sm">·</Text>
           <Icon name="check" size={14} colorVar="--color-success" />
@@ -380,12 +380,12 @@ export default function Dashboard() {
             <Text className="text-foreground text-base font-semibold">
               {scope === "today"
                 ? dayOffset === 0
-                  ? "Today's Activities"
+                  ? "Today's Sessions"
                   : dayOffset === -1
-                    ? "Yesterday's Activities"
+                    ? "Yesterday's Sessions"
                     : dayOffset === 1
-                      ? "Tomorrow's Activities"
-                      : "Activities"
+                      ? "Tomorrow's Sessions"
+                      : "Sessions"
                 : relativeWeekLabel(weekOffset)}
             </Text>
             <Pressable
@@ -403,13 +403,13 @@ export default function Dashboard() {
           </View>
           {sessions.length > 0 && (
             <Text className="text-muted-foreground text-xs mb-3">
-              Tap an activity to mark it complete · tap + to add another
+              Tap an session to mark it complete · tap + to add another
             </Text>
           )}
           {sessions.length === 0 ? (
             <View className="bg-card border border-border rounded-2xl px-4 py-6 items-center">
               <Text className="text-muted-foreground text-sm">
-                No activities scheduled
+                No sessions scheduled
               </Text>
             </View>
           ) : sessionsByDay ? (
