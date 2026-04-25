@@ -17,7 +17,10 @@ export default function Settings() {
 
   return (
     <View className="flex-1 bg-background pt-safe">
-      <ScreenHeader title="Settings" />
+      <ScreenHeader
+        title="Settings"
+        rightAction={{ icon: "user", onPress: () => router.push("/profile") }}
+      />
 
       <ScrollView className="flex-1" contentContainerClassName="pb-6">
         <View className="flex-row items-center justify-between px-6 pb-2">

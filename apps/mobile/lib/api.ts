@@ -2,6 +2,8 @@ import { env } from "./env";
 import type {
   Availability,
   ConflictRow,
+  Persona,
+  PersonaInfo,
   ProgressSummary,
   Session,
   SessionTypeWithCounts,
@@ -140,7 +142,7 @@ export const api = {
         date: string;
         startTime: string;
         duration: number;
-        status: "scheduled" | "completed" | "cancelled";
+        status: "scheduled" | "completed" | "skipped" | "cancelled";
         notes: string | null;
         force: boolean;
       }>,
@@ -159,5 +161,14 @@ export const api = {
   progress: {
     get: (query?: { since?: string; until?: string }) =>
       request<ProgressSummary>("/api/progress", { query }),
+  },
+  dev: {
+    listPersonas: () =>
+      request<{ personas: PersonaInfo[] }>("/api/dev/seed"),
+    seed: (persona: Persona) =>
+      request<{ persona: Persona; types: number; sessions: number }>(
+        "/api/dev/seed",
+        { method: "POST", body: JSON.stringify({ persona }) },
+      ),
   },
 };

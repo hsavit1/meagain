@@ -91,3 +91,9 @@ export function startOfWeekISO(yyyyMmDd: string): string {
   const dow = dayOfWeekISO(yyyyMmDd);
   return addDaysISO(yyyyMmDd, -dow);
 }
+
+export function diffDaysISO(a: string, b: string): number {
+  const da = new Date(a + "T00:00:00Z").getTime();
+  const dbb = new Date(b + "T00:00:00Z").getTime();
+  return Math.round((da - dbb) / 86400000);
+}

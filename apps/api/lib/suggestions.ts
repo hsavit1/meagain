@@ -1,4 +1,4 @@
-import { and, eq, gte, lte, ne } from "drizzle-orm";
+import { and, eq, gte, lte, notInArray } from "drizzle-orm";
 import { db } from "@/db";
 import { sessions, sessionTypes, availability } from "@/db/schema";
 import {
@@ -46,7 +46,7 @@ export async function buildSuggestions(opts: {
         and(
           gte(sessions.date, today),
           lte(sessions.date, endDate),
-          ne(sessions.status, "cancelled"),
+          notInArray(sessions.status, ["cancelled", "skipped"]),
         ),
       ),
   ]);
@@ -107,6 +107,7 @@ export async function buildSuggestions(opts: {
         const { score, reason } = scoreSlot({
           type,
           date,
+          today,
           daySessions,
           lastCompletedDate: lastCompletedByType.get(type.id),
         });
@@ -148,16 +149,24 @@ function minutesToHHMM(minutes: number): string {
 function scoreSlot(args: {
   type: { id: string; name: string; priority: number };
   date: string;
+  today: string;
   daySessions: Array<{ sessionTypeId: string; date: string }>;
   lastCompletedDate: string | undefined;
 }): { score: number; reason: string } {
-  const { type, date, daySessions, lastCompletedDate } = args;
+  const { type, date, today, daySessions, lastCompletedDate } = args;
 
   const priorityScore = type.priority * 20;
 
-  const daysSinceLast =
+  // Spacing relative to the proposed slot — drives the score.
+  const spacingFromSlot =
     lastCompletedDate === undefined ? 999 : diffDaysISO(date, lastCompletedDate);
-  const spacingScore = Math.min(daysSinceLast * 5, 50);
+  const spacingScore = Math.min(spacingFromSlot * 5, 50);
+
+  // Days since last completion as of today — drives the human-facing reason.
+  const daysSinceToday =
+    lastCompletedDate === undefined
+      ? null
+      : Math.max(0, diffDaysISO(today, lastCompletedDate));
 
   const sessionsOnDay = daySessions.length;
   const loadPenalty = sessionsOnDay * 15;
@@ -169,18 +178,22 @@ function scoreSlot(args: {
   const score = priorityScore + spacingScore - loadPenalty - clusterPenalty;
 
   let reason: string;
-  if (lastCompletedDate === undefined) {
+  if (daysSinceToday === null) {
     reason = `First ${type.name} session — great time to start`;
-  } else if (daysSinceLast >= 7) {
-    reason = `It's been ${daysSinceLast} days since your last ${type.name}`;
-  } else if (daysSinceLast >= 3) {
-    reason = `Good spacing (${daysSinceLast} days since last ${type.name})`;
+  } else if (daysSinceToday === 0) {
+    reason = `You did ${type.name} today — this slot keeps the rhythm going`;
+  } else if (daysSinceToday >= 7) {
+    reason = `It's been ${daysSinceToday} days since your last ${type.name}`;
+  } else if (daysSinceToday >= 3) {
+    reason = `Good spacing — last ${type.name} was ${daysSinceToday} days ago`;
   } else if (sessionsOnDay === 0) {
-    reason = "Open day — no other sessions scheduled";
+    reason = `Open day — no other sessions scheduled`;
   } else if (type.priority === 5) {
     reason = `High-priority type — keep momentum`;
   } else {
-    reason = `Fits your availability window`;
+    reason = `Last ${type.name} was ${daysSinceToday} day${
+      daysSinceToday === 1 ? "" : "s"
+    } ago — fits your availability`;
   }
 
   return { score, reason };

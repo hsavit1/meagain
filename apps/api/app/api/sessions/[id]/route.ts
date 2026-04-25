@@ -22,7 +22,9 @@ const updateBody = z
     date: isoDate.optional(),
     startTime: hhmm.optional(),
     duration: z.number().int().min(5).max(600).optional(),
-    status: z.enum(["scheduled", "completed", "cancelled"]).optional(),
+    status: z
+      .enum(["scheduled", "completed", "skipped", "cancelled"])
+      .optional(),
     notes: z.string().max(2000).nullable().optional(),
     force: z.boolean().optional(),
   })
@@ -54,7 +56,12 @@ export async function PUT(req: Request, ctx: RouteContext) {
       patch.startTime !== undefined ||
       patch.duration !== undefined;
 
-    if (willChangeTime && !force && patch.status !== "cancelled") {
+    if (
+      willChangeTime &&
+      !force &&
+      patch.status !== "cancelled" &&
+      patch.status !== "skipped"
+    ) {
       const conflicts = await findConflicts({
         date,
         startTime,

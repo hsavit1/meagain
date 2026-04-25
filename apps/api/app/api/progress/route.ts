@@ -44,10 +44,17 @@ export async function GET(req: Request) {
 
     let totalScheduled = 0;
     let totalCompleted = 0;
+    let totalSkipped = 0;
     let totalCancelled = 0;
     const byTypeMap = new Map<
       string,
-      { name: string; color: string; completed: number; scheduled: number }
+      {
+        name: string;
+        color: string;
+        completed: number;
+        scheduled: number;
+        skipped: number;
+      }
     >();
 
     for (const r of rows) {
@@ -57,11 +64,15 @@ export async function GET(req: Request) {
         color: r.typeColor ?? "#999999",
         completed: 0,
         scheduled: 0,
+        skipped: 0,
       };
 
       if (r.status === "completed") {
         totalCompleted++;
         cur.completed++;
+      } else if (r.status === "skipped") {
+        totalSkipped++;
+        cur.skipped++;
       } else if (r.status === "cancelled") {
         totalCancelled++;
       } else {
@@ -121,12 +132,14 @@ export async function GET(req: Request) {
       color: v.color,
       completed: v.completed,
       scheduled: v.scheduled,
-      total: v.completed + v.scheduled,
+      skipped: v.skipped,
+      total: v.completed + v.scheduled + v.skipped,
     }));
 
     return ok({
       totalScheduled,
       totalCompleted,
+      totalSkipped,
       totalCancelled,
       completionRate: totalScheduled === 0 ? 0 : totalCompleted / totalScheduled,
       byType,

@@ -1,4 +1,8 @@
-export type SessionStatus = "scheduled" | "completed" | "cancelled";
+export type SessionStatus =
+  | "scheduled"
+  | "completed"
+  | "skipped"
+  | "cancelled";
 
 export type SessionType = {
   id: string;
@@ -65,6 +69,7 @@ export type Suggestion = {
 export type ProgressSummary = {
   totalScheduled: number;
   totalCompleted: number;
+  totalSkipped: number;
   totalCancelled: number;
   completionRate: number;
   byType: Array<{
@@ -73,6 +78,7 @@ export type ProgressSummary = {
     color: string;
     completed: number;
     scheduled: number;
+    skipped: number;
     total: number;
   }>;
   avgSpacingDays: number | null;
@@ -86,4 +92,17 @@ export type ConflictRow = {
   date: string;
   startTime: string;
   endTime: string;
+};
+
+export type Persona =
+  | "default"
+  | "empty"
+  | "power-user"
+  | "beginner"
+  | "skipper";
+
+export type PersonaInfo = {
+  key: Persona;
+  label: string;
+  description: string;
 };

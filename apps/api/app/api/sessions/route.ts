@@ -19,7 +19,7 @@ const hhmm = z.string().regex(/^([01]\d|2[0-3]):[0-5]\d$/, "HH:MM required");
 const querySchema = z.object({
   startDate: isoDate.optional(),
   endDate: isoDate.optional(),
-  status: z.enum(["scheduled", "completed", "cancelled"]).optional(),
+  status: z.enum(["scheduled", "completed", "skipped", "cancelled"]).optional(),
   typeId: z.string().optional(),
 });
 

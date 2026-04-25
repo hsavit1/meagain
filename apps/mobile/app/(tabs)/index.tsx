@@ -1,19 +1,32 @@
-import { useRouter } from "expo-router";
-import { useState } from "react";
-import { Pressable, ScrollView, Text, View } from "react-native";
+import { useLocalSearchParams, useRouter } from "expo-router";
+import { useEffect, useState } from "react";
+import {
+  Pressable,
+  RefreshControl,
+  ScrollView,
+  Text,
+  View,
+} from "react-native";
 import { toast } from "sonner-native";
+import { ActionSheet } from "@/components/action-sheet";
 import { Icon } from "@/components/icon";
+import { NotificationsSheet } from "@/components/notifications-sheet";
 import { ScreenHeader } from "@/components/screen-header";
 import { SessionCard } from "@/components/session-card";
 import { SuggestionCard } from "@/components/suggestion-card";
 import {
+  useCreateSession,
+  useDeleteSession,
   useProgress,
   useSessions,
   useSuggestions,
   useUpdateSession,
 } from "@/hooks/use-api";
+import { ApiError } from "@/lib/api";
+import type { Session, Suggestion } from "@/lib/types";
 import {
   addDaysISO,
+  diffDaysISO,
   formatDateLong,
   formatDateShort,
   startOfWeekISO,
@@ -54,10 +67,19 @@ function relativeDayLabel(offset: number): string {
 
 export default function Dashboard() {
   const router = useRouter();
+  const params = useLocalSearchParams<{ date?: string }>();
   const [scope, setScopeState] = useState<"today" | "week">("today");
   const [weekOffset, setWeekOffset] = useState(0);
   const [dayOffset, setDayOffset] = useState(0);
   const today = todayISO();
+
+  useEffect(() => {
+    if (!params.date) return;
+    if (!/^\d{4}-\d{2}-\d{2}$/.test(params.date)) return;
+    setScopeState("today");
+    setDayOffset(diffDaysISO(params.date, today));
+    router.setParams({ date: undefined });
+  }, [params.date, today, router]);
   const currentWeekStart = startOfWeekISO(today);
   const weekStart = addDaysISO(currentWeekStart, weekOffset * 7);
   const weekEnd = addDaysISO(weekStart, 6);
@@ -76,6 +98,70 @@ export default function Dashboard() {
   const suggestionsQ = useSuggestions(2);
   const progressQ = useProgress({ since: startDate, until: endDate });
   const updateSession = useUpdateSession();
+  const deleteSession = useDeleteSession();
+  const createSession = useCreateSession();
+  const [actionTarget, setActionTarget] = useState<Session | null>(null);
+  const [suggestionTarget, setSuggestionTarget] = useState<Suggestion | null>(
+    null,
+  );
+  const [notificationsOpen, setNotificationsOpen] = useState(false);
+  const [refreshing, setRefreshing] = useState(false);
+
+  async function refreshAll() {
+    setRefreshing(true);
+    try {
+      await Promise.all([
+        sessionsQ.refetch(),
+        suggestionsQ.refetch(),
+        progressQ.refetch(),
+      ]);
+    } finally {
+      setRefreshing(false);
+    }
+  }
+
+  function adjustSuggestion(s: Suggestion) {
+    router.push({
+      pathname: "/new-session",
+      params: {
+        typeId: s.sessionTypeId,
+        date: s.date,
+        startTime: s.startTime,
+        duration: String(s.duration),
+      },
+    });
+  }
+
+  function acceptSuggestion(s: Suggestion) {
+    createSession.mutate(
+      {
+        sessionTypeId: s.sessionTypeId,
+        title: s.sessionType.name,
+        date: s.date,
+        startTime: s.startTime,
+        duration: s.duration,
+      },
+      {
+        onSuccess: () => {
+          toast.success("Activity scheduled", {
+            description: `${s.sessionType.name} on ${s.date} at ${s.startTime}`,
+            onPress: () =>
+              router.navigate({ pathname: "/", params: { date: s.date } }),
+          });
+        },
+        onError: (err) => {
+          if (err instanceof ApiError && err.status === 409) {
+            toast.error("Time conflict", {
+              description: "Open Adjust to pick a different time.",
+            });
+            adjustSuggestion(s);
+          } else {
+            toast.error("Could not save", { description: err.message });
+          }
+        },
+      },
+    );
+  }
 
   const sessions = sessionsQ.data ?? [];
   const completed = sessions.filter((s) => s.status === "completed").length;
@@ -110,14 +196,30 @@ export default function Dashboard() {
     );
   }
 
+  function setStatus(s: Session, status: Session["status"], label: string) {
+    updateSession.mutate(
+      { id: s.id, data: { status } },
+      { onSuccess: () => toast(label, { description: s.title }) },
+    );
+  }
+
   return (
     <View className="flex-1 bg-background pt-safe">
       <ScreenHeader
         title="Dashboard"
-        rightAction={{ icon: "bell", onPress: () => {} }}
+        rightAction={{
+          icon: "bell",
+          onPress: () => setNotificationsOpen(true),
+        }}
       />
 
-      <ScrollView contentContainerClassName="pb-6" className="flex-1">
+      <ScrollView
+        contentContainerClassName="pb-6"
+        className="flex-1"
+        refreshControl={
+          <RefreshControl refreshing={refreshing} onRefresh={refreshAll} />
+        }
+      >
         <View className="flex-row items-center justify-between px-6 pb-3">
           <View className="flex-1 pr-3">
             {scope === "today" ? (
@@ -258,9 +360,16 @@ export default function Dashboard() {
               contentContainerClassName="px-6 gap-3"
             >
               {suggestionsQ.data!.map((s, i) => (
-                <View key={i} style={{ width: 280 }}>
+                <Pressable
+                  key={i}
+                  onPress={() => adjustSuggestion(s)}
+                  onLongPress={() => setSuggestionTarget(s)}
+                  delayLongPress={250}
+                  style={{ width: 280 }}
+                  className="active:opacity-80"
+                >
                   <SuggestionCard suggestion={s} />
-                </View>
+                </Pressable>
               ))}
             </ScrollView>
           </View>
@@ -320,6 +429,7 @@ export default function Dashboard() {
                         <SessionCard
                           session={s}
                           onToggleStatus={() => toggleSession(s)}
+                          onLongPress={() => setActionTarget(s)}
                         />
                       </View>
                     ))}
@@ -337,6 +447,7 @@ export default function Dashboard() {
                   <SessionCard
                     session={s}
                     onToggleStatus={() => toggleSession(s)}
+                    onLongPress={() => setActionTarget(s)}
                   />
                 </View>
               ))}
@@ -389,6 +500,95 @@ export default function Dashboard() {
           </View>
         )}
       </ScrollView>
+
+      <ActionSheet
+        visible={actionTarget !== null}
+        title={actionTarget?.title}
+        subtitle={
+          actionTarget
+            ? `${actionTarget.startTime} · ${actionTarget.duration} min`
+            : undefined
+        }
+        onClose={() => setActionTarget(null)}
+        items={
+          actionTarget
+            ? [
+                {
+                  key: "complete",
+                  label: "Mark complete",
+                  icon: "check",
+                  disabled: actionTarget.status === "completed",
+                  onPress: () =>
+                    setStatus(actionTarget, "completed", "Marked complete"),
+                },
+                {
+                  key: "skip",
+                  label: "Mark skipped",
+                  icon: "x",
+                  disabled: actionTarget.status === "skipped",
+                  onPress: () =>
+                    setStatus(actionTarget, "skipped", "Marked skipped"),
+                },
+                {
+                  key: "reset",
+                  label: "Reset to scheduled",
+                  icon: "rotate-ccw",
+                  disabled: actionTarget.status === "scheduled",
+                  onPress: () =>
+                    setStatus(actionTarget, "scheduled", "Reset to scheduled"),
+                },
+                {
+                  key: "delete",
+                  label: "Delete",
+                  icon: "trash-2",
+                  destructive: true,
+                  onPress: () => {
+                    const id = actionTarget.id;
+                    const title = actionTarget.title;
+                    deleteSession.mutate(id, {
+                      onSuccess: () =>
+                        toast("Deleted", { description: title }),
+                    });
+                  },
+                },
+              ]
+            : []
+        }
+      />
+
+      <ActionSheet
+        visible={suggestionTarget !== null}
+        title={suggestionTarget?.sessionType.name}
+        subtitle={
+          suggestionTarget
+            ? `${suggestionTarget.date} · ${suggestionTarget.startTime}`
+            : undefined
+        }
+        onClose={() => setSuggestionTarget(null)}
+        items={
+          suggestionTarget
+            ? [
+                {
+                  key: "accept",
+                  label: "Accept this slot",
+                  icon: "check",
+                  onPress: () => acceptSuggestion(suggestionTarget),
+                },
+                {
+                  key: "adjust",
+                  label: "Adjust…",
+                  icon: "pencil",
+                  onPress: () => adjustSuggestion(suggestionTarget),
+                },
+              ]
+            : []
+        }
+      />
+
+      <NotificationsSheet
+        visible={notificationsOpen}
+        onClose={() => setNotificationsOpen(false)}
+      />
     </View>
   );
 }

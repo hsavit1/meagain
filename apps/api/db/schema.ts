@@ -25,7 +25,9 @@ export const sessions = sqliteTable("sessions", {
   date: text("date").notNull(),
   startTime: text("start_time").notNull(),
   duration: integer("duration").notNull(),
-  status: text("status", { enum: ["scheduled", "completed", "cancelled"] })
+  status: text("status", {
+    enum: ["scheduled", "completed", "skipped", "cancelled"],
+  })
     .notNull()
     .default("scheduled"),
   notes: text("notes"),

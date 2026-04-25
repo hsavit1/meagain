@@ -24,6 +24,11 @@ export default function SuggestionsScreen() {
         onSuccess: () => {
           toast.success("Activity scheduled", {
             description: `${s.sessionType.name} on ${formatDateLong(s.date)} at ${formatTime12h(s.startTime)}`,
+            onPress: () =>
+              router.navigate({
+                pathname: "/",
+                params: { date: s.date },
+              }),
           });
           refetch();
           router.back();

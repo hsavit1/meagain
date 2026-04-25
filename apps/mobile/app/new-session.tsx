@@ -71,6 +71,12 @@ export default function NewSession() {
   }, [types]);
 
   const selectedType = types.find((t) => t.id === typeId);
+  const orderedTypes = typeId
+    ? [
+        ...types.filter((t) => t.id === typeId),
+        ...types.filter((t) => t.id !== typeId),
+      ]
+    : types;
 
   const activityEnd = addMinutes(startTime, duration);
   const dow = dayOfWeekISO(date);
@@ -110,6 +116,8 @@ export default function NewSession() {
         onSuccess: () => {
           toast.success("Activity saved", {
             description: `${title} on ${formatDateLong(date)} at ${formatTime12h(startTime)}`,
+            onPress: () =>
+              router.navigate({ pathname: "/", params: { date } }),
           });
           router.back();
         },
@@ -159,7 +167,7 @@ export default function NewSession() {
               >
                 <Icon name="plus" size={16} colorVar="--color-primary" />
               </Pressable>
-              {types.map((t) => {
+              {orderedTypes.map((t) => {
                 const active = t.id === typeId;
                 return (
                   <Pressable

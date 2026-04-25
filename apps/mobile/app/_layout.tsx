@@ -53,6 +53,7 @@ export default function RootLayout() {
                 options={{ presentation: "modal" }}
               />
               <Stack.Screen name="suggestions" />
+              <Stack.Screen name="profile" />
             </Stack>
             <StatusBar style="auto" />
             <Toaster position="top-center" offset={60} />

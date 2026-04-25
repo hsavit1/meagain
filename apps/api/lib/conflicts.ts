@@ -1,4 +1,4 @@
-import { and, eq, ne } from "drizzle-orm";
+import { and, eq, ne, notInArray } from "drizzle-orm";
 import { db } from "@/db";
 import { sessions } from "@/db/schema";
 import { addMinutes, intervalsOverlap } from "./time";
@@ -32,7 +32,7 @@ export async function findConflicts(args: {
     .where(
       and(
         eq(sessions.date, args.date),
-        ne(sessions.status, "cancelled"),
+        notInArray(sessions.status, ["cancelled", "skipped"]),
         args.excludeId ? ne(sessions.id, args.excludeId) : undefined,
       ),
     );

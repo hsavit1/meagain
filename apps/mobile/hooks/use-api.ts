@@ -41,6 +41,7 @@ export function useSuggestions(limit = 5) {
   return useQuery({
     queryKey: queryKeys.suggestions(limit),
     queryFn: () => api.suggestions.list({ limit }),
+    staleTime: 0,
   });
 }
 
@@ -145,6 +146,24 @@ export function useDeleteSession() {
       qc.invalidateQueries({ queryKey: ["sessions"] });
       qc.invalidateQueries({ queryKey: queryKeys.sessionTypes });
       qc.invalidateQueries({ queryKey: ["progress"] });
+    },
+  });
+}
+
+export function usePersonas() {
+  return useQuery({
+    queryKey: ["personas"] as const,
+    queryFn: () => api.dev.listPersonas().then((r) => r.personas),
+    staleTime: Infinity,
+  });
+}
+
+export function useSeedPersona() {
+  const qc = useQueryClient();
+  return useMutation({
+    mutationFn: api.dev.seed,
+    onSuccess: () => {
+      qc.invalidateQueries();
     },
   });
 }

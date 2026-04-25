@@ -32,6 +32,15 @@ const COLORS = [
 
 const ICONS = ["sun", "dumbbell", "book-open", "music", "brain", "coffee"];
 
+const ICON_CATEGORY: Record<string, string> = {
+  sun: "Wellness",
+  dumbbell: "Health",
+  "book-open": "Learning",
+  music: "Creative",
+  brain: "Focus",
+  coffee: "Social",
+};
+
 export default function NewSessionType() {
   const router = useRouter();
   const params = useLocalSearchParams<{ id?: string }>();
@@ -43,10 +52,20 @@ export default function NewSessionType() {
   const remove = useDeleteSessionType();
 
   const [name, setName] = useState("");
-  const [category, setCategory] = useState("Health");
+  const [category, setCategory] = useState(ICON_CATEGORY[ICONS[0]]);
   const [priority, setPriority] = useState(3);
   const [color, setColor] = useState(COLORS[0]);
   const [icon, setIcon] = useState(ICONS[0]);
+
+  function selectIcon(next: string) {
+    setIcon(next);
+    const auto = ICON_CATEGORY[next];
+    if (!auto) return;
+    const trimmed = category.trim();
+    const wasAuto =
+      trimmed === "" || Object.values(ICON_CATEGORY).includes(trimmed);
+    if (wasAuto) setCategory(auto);
+  }
 
   useEffect(() => {
     if (!editing) return;
@@ -227,7 +246,7 @@ export default function NewSessionType() {
               return (
                 <Pressable
                   key={i}
-                  onPress={() => setIcon(i)}
+                  onPress={() => selectIcon(i)}
                   className="h-11 w-11 rounded-xl items-center justify-center"
                   style={{
                     backgroundColor: active ? "#1E3A5F" : "#FFFFFF",
