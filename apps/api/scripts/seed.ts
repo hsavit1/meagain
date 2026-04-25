@@ -1,8 +1,9 @@
 import Database from "better-sqlite3";
 import { drizzle } from "drizzle-orm/better-sqlite3";
 import { availability, sessions, sessionTypes } from "../db/schema";
+import { env } from "../lib/env";
 
-const sqlite = new Database(process.env.DATABASE_FILE ?? "dev.db");
+const sqlite = new Database(env.DATABASE_FILE);
 sqlite.pragma("foreign_keys = ON");
 const db = drizzle(sqlite);
 

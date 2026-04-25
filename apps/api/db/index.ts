@@ -1,13 +1,13 @@
 import Database from "better-sqlite3";
 import { drizzle } from "drizzle-orm/better-sqlite3";
+import { env } from "@/lib/env";
 import * as schema from "./schema";
 
 const globalForDb = globalThis as unknown as {
   sqlite?: Database.Database;
 };
 
-const sqlite =
-  globalForDb.sqlite ?? new Database(process.env.DATABASE_FILE ?? "dev.db");
+const sqlite = globalForDb.sqlite ?? new Database(env.DATABASE_FILE);
 
 if (!globalForDb.sqlite) {
   sqlite.pragma("journal_mode = WAL");

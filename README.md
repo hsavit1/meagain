@@ -58,22 +58,31 @@ Then in the Expo CLI:
 
 ## Environment variables
 
-### Mobile (`apps/mobile`)
-
-The mobile app reads the API URL from `EXPO_PUBLIC_API_URL`. Defaults to `http://localhost:3000` if unset.
-
-For physical devices on the same network, set it to your machine's LAN IP:
+Both apps validate env vars with Zod at startup — a missing or malformed var fails fast with a clear error rather than silently using `undefined`. Each app ships an `.env.example` you can copy:
 
 ```bash
-# apps/mobile/.env.local
-EXPO_PUBLIC_API_URL=http://192.168.1.42:3000
+cp apps/api/.env.example apps/api/.env.local
+cp apps/mobile/.env.example apps/mobile/.env.local
 ```
 
 ### API (`apps/api`)
 
 | Var | Default | Purpose |
 |-----|---------|---------|
-| `DATABASE_FILE` | `dev.db` | Path to the SQLite file |
+| `DATABASE_FILE` | `dev.db` | Path to the SQLite file (relative to `apps/api` or absolute) |
+| `NODE_ENV` | `development` | Standard Node env. Validated to `development \| production \| test` |
+
+Schema lives in `apps/api/lib/env.ts`.
+
+### Mobile (`apps/mobile`)
+
+| Var | Default | Purpose |
+|-----|---------|---------|
+| `EXPO_PUBLIC_API_URL` | `http://localhost:3000` | Base URL for the API. Validated as a URL |
+
+For physical devices on the same Wi-Fi, set this to your machine's LAN IP (e.g. `http://192.168.1.42:3000`). The `EXPO_PUBLIC_` prefix is required for Expo to inline the value into the app bundle.
+
+Schema lives in `apps/mobile/lib/env.ts`.
 
 ## Available commands
 
