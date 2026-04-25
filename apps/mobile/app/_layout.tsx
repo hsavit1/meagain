@@ -1,24 +1,59 @@
-import { DarkTheme, DefaultTheme, ThemeProvider } from '@react-navigation/native';
-import { Stack } from 'expo-router';
-import { StatusBar } from 'expo-status-bar';
-import 'react-native-reanimated';
-
-import { useColorScheme } from '@/hooks/use-color-scheme';
+import "../global.css";
+import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
+import { Stack } from "expo-router";
+import { StatusBar } from "expo-status-bar";
+import { useState } from "react";
+import {
+  SafeAreaListener,
+  SafeAreaProvider,
+} from "react-native-safe-area-context";
+import "react-native-reanimated";
+import { Uniwind } from "uniwind";
 
 export const unstable_settings = {
-  anchor: '(tabs)',
+  anchor: "(tabs)",
 };
 
 export default function RootLayout() {
-  const colorScheme = useColorScheme();
+  const [queryClient] = useState(
+    () =>
+      new QueryClient({
+        defaultOptions: {
+          queries: {
+            staleTime: 30_000,
+            retry: 1,
+          },
+        },
+      }),
+  );
 
   return (
-    <ThemeProvider value={colorScheme === 'dark' ? DarkTheme : DefaultTheme}>
-      <Stack>
-        <Stack.Screen name="(tabs)" options={{ headerShown: false }} />
-        <Stack.Screen name="modal" options={{ presentation: 'modal', title: 'Modal' }} />
-      </Stack>
-      <StatusBar style="auto" />
-    </ThemeProvider>
+    <SafeAreaProvider>
+      <SafeAreaListener
+        onChange={({ insets }) => {
+          Uniwind.updateInsets(insets);
+        }}
+      >
+        <QueryClientProvider client={queryClient}>
+          <Stack screenOptions={{ headerShown: false }}>
+            <Stack.Screen name="(tabs)" />
+            <Stack.Screen
+              name="new-session"
+              options={{ presentation: "modal" }}
+            />
+            <Stack.Screen
+              name="new-session-type"
+              options={{ presentation: "modal" }}
+            />
+            <Stack.Screen
+              name="availability"
+              options={{ presentation: "modal" }}
+            />
+            <Stack.Screen name="suggestions" />
+          </Stack>
+          <StatusBar style="auto" />
+        </QueryClientProvider>
+      </SafeAreaListener>
+    </SafeAreaProvider>
   );
 }

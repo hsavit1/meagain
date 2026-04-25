@@ -72,3 +72,6 @@ yarn-error.*
 # SQLite database files
 *.db
 *.db-journal
+
+# Uniwind auto-generated TypeScript types
+uniwind-types.d.ts

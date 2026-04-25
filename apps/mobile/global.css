@@ -1,0 +1,76 @@
+@import 'tailwindcss';
+@import 'uniwind';
+
+@layer theme {
+  :root {
+    @variant light {
+      --color-background: #FAF8F5;
+      --color-foreground: #111827;
+      --color-muted-foreground: #6B7280;
+      --color-card: #FFFFFF;
+      --color-border: #E5E7EB;
+      --color-muted: #F3F4F6;
+      --color-primary: #1E3A5F;
+      --color-primary-foreground: #FFFFFF;
+      --color-success: #166534;
+      --color-success-bg: #F0FDF4;
+      --color-info: #1E3A5F;
+      --color-info-bg: #EFF6FF;
+      --color-warning: #92400E;
+      --color-warning-bg: #FEF3C7;
+      --color-warning-border: #FCD34D;
+      --color-danger: #DC2626;
+      --color-danger-border: #FCA5A5;
+      --color-suggestion: #EDE8FF;
+      --color-suggestion-foreground: #4C1D95;
+      --color-suggestion-accent: #3B1FA8;
+      --color-suggestion-secondary: #6D28D9;
+
+      /* Session type colors */
+      --color-sage: #A8C5A0;
+      --color-lavender: #C4B5FD;
+      --color-coral: #FCA5A5;
+      --color-sky: #93C5FD;
+      --color-amber: #FCD34D;
+      --color-mint: #6EE7B7;
+      --color-pink: #F9A8D4;
+      --color-slate: #CBD5E1;
+    }
+    @variant dark {
+      --color-background: #0F1419;
+      --color-foreground: #F9FAFB;
+      --color-muted-foreground: #9CA3AF;
+      --color-card: #1F2937;
+      --color-border: #374151;
+      --color-muted: #1F2937;
+      --color-primary: #93C5FD;
+      --color-primary-foreground: #0F1419;
+      --color-success: #6EE7B7;
+      --color-success-bg: #064E3B;
+      --color-info: #93C5FD;
+      --color-info-bg: #1E3A8A;
+      --color-warning: #FCD34D;
+      --color-warning-bg: #78350F;
+      --color-warning-border: #A16207;
+      --color-danger: #FCA5A5;
+      --color-danger-border: #DC2626;
+      --color-suggestion: #2E1065;
+      --color-suggestion-foreground: #DDD6FE;
+      --color-suggestion-accent: #C4B5FD;
+      --color-suggestion-secondary: #A78BFA;
+
+      --color-sage: #A8C5A0;
+      --color-lavender: #C4B5FD;
+      --color-coral: #FCA5A5;
+      --color-sky: #93C5FD;
+      --color-amber: #FCD34D;
+      --color-mint: #6EE7B7;
+      --color-pink: #F9A8D4;
+      --color-slate: #CBD5E1;
+    }
+  }
+}
+
+@theme {
+  --font-sans: 'System';
+}
