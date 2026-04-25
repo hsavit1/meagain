@@ -1,8 +1,9 @@
 import DateTimePicker from "@react-native-community/datetimepicker";
 import { useLocalSearchParams, useRouter } from "expo-router";
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import {
   KeyboardAvoidingView,
+  Modal,
   Platform,
   Pressable,
   ScrollView,
@@ -51,11 +52,22 @@ export default function NewSession() {
     if (!typeId && types.length > 0) setTypeId(types[0].id);
   }, [types, typeId]);
 
+  const idsBeforeCreateRef = useRef<Set<string> | null>(null);
+  useEffect(() => {
+    const known = idsBeforeCreateRef.current;
+    if (!known) return;
+    const fresh = types.find((t) => !known.has(t.id));
+    if (fresh) {
+      setTypeId(fresh.id);
+      idsBeforeCreateRef.current = null;
+    }
+  }, [types]);
+
   const selectedType = types.find((t) => t.id === typeId);
 
   function handleSave(force = false) {
     if (!typeId) return;
-    const title = selectedType?.name ?? "Session";
+    const title = selectedType?.name ?? "Activity";
     setConflicts([]);
     createSession.mutate(
       {
@@ -69,7 +81,7 @@ export default function NewSession() {
       },
       {
         onSuccess: () => {
-          toast.success("Session saved", {
+          toast.success("Activity saved", {
             description: `${title} on ${formatDateLong(date)} at ${formatTime12h(startTime)}`,
           });
           router.back();
@@ -78,7 +90,7 @@ export default function NewSession() {
           if (err instanceof ApiError && err.status === 409 && err.conflicts) {
             setConflicts(err.conflicts);
             toast.error("Time conflict", {
-              description: "This session overlaps with an existing one.",
+              description: "This activity overlaps with an existing one.",
             });
           } else {
             toast.error("Could not save", { description: err.message });
@@ -97,7 +109,7 @@ export default function NewSession() {
         <View className="bg-border rounded-full" style={{ width: 36, height: 4 }} />
       </View>
       <View className="flex-row items-center justify-between px-6 py-3">
-        <Text className="text-foreground text-2xl font-medium">New Session</Text>
+        <Text className="text-foreground text-2xl font-medium">New Activity</Text>
         <Pressable onPress={() => router.back()} hitSlop={12}>
           <Text className="text-muted-foreground text-base">Cancel</Text>
         </Pressable>
@@ -106,12 +118,15 @@ export default function NewSession() {
       <ScrollView className="flex-1" contentContainerClassName="px-6 pb-6 gap-5">
         <View className="gap-2">
           <Text className="text-foreground text-sm font-semibold">
-            Session Type
+            Activity Type
           </Text>
           <ScrollView horizontal showsHorizontalScrollIndicator={false}>
             <View className="flex-row gap-2">
               <Pressable
-                onPress={() => router.push("/new-session-type")}
+                onPress={() => {
+                  idsBeforeCreateRef.current = new Set(types.map((t) => t.id));
+                  router.push("/new-session-type");
+                }}
                 className="rounded-full h-9 w-9 items-center justify-center bg-card active:opacity-70"
                 style={{ borderWidth: 1, borderColor: "#E5E7EB" }}
               >
@@ -183,7 +198,54 @@ export default function NewSession() {
             </Text>
             <Icon name="timer" size={18} colorVar="--color-muted-foreground" />
           </Pressable>
-          {showTime && (
+          {showTime && Platform.OS === "ios" && (
+            <Modal
+              transparent
+              animationType="slide"
+              visible
+              onRequestClose={() => setShowTime(false)}
+            >
+              <View
+                className="flex-1 justify-end"
+                style={{ backgroundColor: "rgba(0,0,0,0.4)" }}
+              >
+                <Pressable
+                  onPress={() => setShowTime(false)}
+                  className="flex-1"
+                />
+                <View className="bg-card pb-safe-or-4">
+                  <View className="flex-row items-center justify-between px-4 py-3 border-b border-border">
+                    <Text className="text-muted-foreground text-sm">
+                      Start time
+                    </Text>
+                    <Pressable onPress={() => setShowTime(false)} hitSlop={12}>
+                      <Text className="text-primary text-base font-semibold">
+                        Done
+                      </Text>
+                    </Pressable>
+                  </View>
+                  <DateTimePicker
+                    value={(() => {
+                      const [h, m] = startTime.split(":").map(Number);
+                      const d = new Date();
+                      d.setHours(h, m, 0, 0);
+                      return d;
+                    })()}
+                    mode="time"
+                    display="spinner"
+                    onChange={(_, d) => {
+                      if (d) {
+                        const hh = String(d.getHours()).padStart(2, "0");
+                        const mm = String(d.getMinutes()).padStart(2, "0");
+                        setStartTime(`${hh}:${mm}`);
+                      }
+                    }}
+                  />
+                </View>
+              </View>
+            </Modal>
+          )}
+          {showTime && Platform.OS !== "ios" && (
             <DateTimePicker
               value={(() => {
                 const [h, m] = startTime.split(":").map(Number);
@@ -192,9 +254,9 @@ export default function NewSession() {
                 return d;
               })()}
               mode="time"
-              display={Platform.OS === "ios" ? "spinner" : "default"}
+              display="default"
               onChange={(_, d) => {
-                setShowTime(Platform.OS === "ios");
+                setShowTime(false);
                 if (d) {
                   const hh = String(d.getHours()).padStart(2, "0");
                   const mm = String(d.getMinutes()).padStart(2, "0");
@@ -243,7 +305,7 @@ export default function NewSession() {
           <TextInput
             value={notes}
             onChangeText={setNotes}
-            placeholder="Add notes about this session..."
+            placeholder="Add notes about this activity..."
             placeholderTextColorClassName="accent-muted-foreground"
             multiline
             numberOfLines={3}
@@ -291,7 +353,7 @@ export default function NewSession() {
           }}
         >
           <Text className="text-white text-base font-semibold">
-            {createSession.isPending ? "Saving..." : "Save Session"}
+            {createSession.isPending ? "Saving..." : "Save Activity"}
           </Text>
         </Pressable>
 

@@ -22,7 +22,7 @@ export default function SuggestionsScreen() {
       },
       {
         onSuccess: () => {
-          toast.success("Session scheduled", {
+          toast.success("Activity scheduled", {
             description: `${s.sessionType.name} on ${formatDateLong(s.date)} at ${formatTime12h(s.startTime)}`,
           });
           refetch();
@@ -50,7 +50,8 @@ export default function SuggestionsScreen() {
     <View className="flex-1 bg-background pt-safe">
       <ScreenHeader title="Smart Suggestions" onBack={() => router.back()} />
       <Text className="px-6 text-muted-foreground text-sm pb-3">
-        Based on your availability, sessions and priorities
+        Times that fit your availability, history, and priorities. Tap Accept
+        to schedule, or Adjust to tweak first.
       </Text>
 
       <ScrollView className="flex-1" contentContainerClassName="px-4 pb-6 gap-3">
@@ -60,7 +61,7 @@ export default function SuggestionsScreen() {
               No suggestions yet
             </Text>
             <Text className="text-muted-foreground text-sm text-center">
-              Add session types and enable some availability windows to get
+              Add activity types and enable some availability windows to get
               smart suggestions.
             </Text>
           </View>

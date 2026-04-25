@@ -11,17 +11,23 @@ type Props = {
 export function SuggestionCard({ suggestion, onAccept, onAdjust }: Props) {
   return (
     <View className="bg-suggestion rounded-2xl p-4 gap-3">
-      <View className="flex-row items-center justify-between">
+      <View className="gap-1">
         <View className="flex-row items-center gap-2">
           <View
             className="h-2.5 w-2.5 rounded-full"
             style={{ backgroundColor: suggestion.sessionType.color }}
           />
-          <Text className="text-suggestion-accent text-sm font-semibold">
+          <Text
+            className="text-suggestion-accent text-sm font-semibold flex-1"
+            numberOfLines={1}
+          >
             {suggestion.sessionType.name}
           </Text>
         </View>
-        <Text className="text-suggestion-secondary text-xs">
+        <Text
+          className="text-suggestion-secondary text-xs"
+          numberOfLines={1}
+        >
           {formatDateShort(suggestion.date)} ·{" "}
           {formatTime12h(suggestion.startTime)}–
           {formatTime12h(suggestion.endTime)}

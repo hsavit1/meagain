@@ -7,11 +7,10 @@ import { Pressable, Text, View } from "react-native";
 import { useCSSVariable } from "uniwind";
 import { Icon } from "@/components/icon";
 
-type TabKey = "index" | "calendar" | "stats" | "settings";
+type TabKey = "index" | "stats" | "settings";
 
 const TABS: Array<{ key: TabKey; label: string; icon: string }> = [
   { key: "index", label: "Home", icon: "house" },
-  { key: "calendar", label: "Calendar", icon: "calendar" },
   { key: "stats", label: "Stats", icon: "chart-bar" },
   { key: "settings", label: "Settings", icon: "settings" },
 ];
@@ -69,7 +68,6 @@ export default function TabLayout() {
   return (
     <Tabs screenOptions={screenOptions} tabBar={(props) => <TabBar {...props} />}>
       <Tabs.Screen name="index" options={{ title: "Home" }} />
-      <Tabs.Screen name="calendar" options={{ title: "Calendar" }} />
       <Tabs.Screen name="stats" options={{ title: "Stats" }} />
       <Tabs.Screen name="settings" options={{ title: "Settings" }} />
     </Tabs>

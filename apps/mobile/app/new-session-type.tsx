@@ -63,13 +63,13 @@ export default function NewSessionType() {
   function handleSave() {
     if (!name.trim()) {
       toast.error("Name required", {
-        description: "Please enter a name for this session type.",
+        description: "Please enter a name for this activity type.",
       });
       return;
     }
     const data = { name: name.trim(), category, priority, color, icon };
     const onSuccess = () => {
-      toast.success(editing ? "Session type updated" : "Session type created", {
+      toast.success(editing ? "Activity type updated" : "Activity type created", {
         description: data.name,
       });
       router.back();
@@ -87,8 +87,8 @@ export default function NewSessionType() {
   function handleDelete() {
     if (!params.id) return;
     Alert.alert(
-      "Delete session type?",
-      "This will also delete all sessions of this type.",
+      "Delete activity type?",
+      "This will also delete all activities of this type.",
       [
         { text: "Cancel", style: "cancel" },
         {
@@ -97,10 +97,10 @@ export default function NewSessionType() {
           onPress: () =>
             remove.mutate(params.id!, {
               onSuccess: (res) => {
-                toast.success("Session type deleted", {
+                toast.success("Activity type deleted", {
                   description:
                     res.deletedSessions > 0
-                      ? `Also removed ${res.deletedSessions} session${res.deletedSessions === 1 ? "" : "s"}`
+                      ? `Also removed ${res.deletedSessions} ${res.deletedSessions === 1 ? "activity" : "activities"}`
                       : undefined,
                 });
                 router.back();
@@ -125,7 +125,7 @@ export default function NewSessionType() {
       </View>
       <View className="flex-row items-center justify-between px-6 py-3">
         <Text className="text-foreground text-2xl font-medium">
-          {editing ? "Edit Session Type" : "New Session Type"}
+          {editing ? "Edit Activity Type" : "New Activity Type"}
         </Text>
         <Pressable onPress={() => router.back()} hitSlop={12}>
           <Text className="text-muted-foreground text-base">Cancel</Text>
@@ -260,11 +260,7 @@ export default function NewSessionType() {
           }}
         >
           <Text className="text-white text-base font-semibold">
-            {isPending
-              ? "Saving..."
-              : editing
-                ? "Save Session Type"
-                : "Save Session Type"}
+            {isPending ? "Saving..." : "Save Activity Type"}
           </Text>
         </Pressable>
 
@@ -276,7 +272,7 @@ export default function NewSessionType() {
           >
             <Icon name="trash-2" size={16} colorVar="--color-danger" />
             <Text className="text-danger text-base font-medium">
-              Delete Session Type
+              Delete Activity Type
             </Text>
           </Pressable>
         )}

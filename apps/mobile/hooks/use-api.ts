@@ -7,7 +7,8 @@ export const queryKeys = {
     ["sessions", filters ?? {}] as const,
   availability: ["availability"] as const,
   suggestions: (limit?: number) => ["suggestions", limit ?? 5] as const,
-  progress: (since?: string) => ["progress", since ?? "all"] as const,
+  progress: (range?: { since?: string; until?: string }) =>
+    ["progress", range?.since ?? "all", range?.until ?? "all"] as const,
 };
 
 export function useSessionTypes() {
@@ -43,10 +44,15 @@ export function useSuggestions(limit = 5) {
   });
 }
 
-export function useProgress(since?: string) {
+export function useProgress(range?: { since?: string; until?: string }) {
   return useQuery({
-    queryKey: queryKeys.progress(since),
-    queryFn: () => api.progress.get(since ? { since } : undefined),
+    queryKey: queryKeys.progress(range),
+    queryFn: () =>
+      api.progress.get(
+        range?.since || range?.until
+          ? { since: range.since, until: range.until }
+          : undefined,
+      ),
   });
 }
 

@@ -22,7 +22,7 @@ export default function Settings() {
       <ScrollView className="flex-1" contentContainerClassName="pb-6">
         <View className="flex-row items-center justify-between px-6 pb-2">
           <Text className="text-muted-foreground text-xs font-semibold tracking-wide">
-            SESSION TYPES
+            ACTIVITY TYPES
           </Text>
           <Pressable
             onPress={() => router.push("/new-session-type")}
@@ -56,14 +56,14 @@ export default function Settings() {
               </View>
               <View className="bg-muted rounded-full px-2 py-0.5">
                 <Text className="text-muted-foreground text-xs">
-                  {t.completedCount + t.scheduledCount} sessions
+                  {t.completedCount + t.scheduledCount} logged
                 </Text>
               </View>
             </Pressable>
           ))}
           {typesQ.isSuccess && typesQ.data.length === 0 && (
             <Text className="text-muted-foreground text-sm text-center py-6">
-              No session types yet — tap "New Type" to add one
+              No activity types yet — tap "New Type" to add one
             </Text>
           )}
         </View>

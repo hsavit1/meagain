@@ -6,14 +6,13 @@ import type { Session } from "@/lib/types";
 type Props = {
   session: Session;
   onToggleStatus?: () => void;
-  onPress?: () => void;
 };
 
-export function SessionCard({ session, onToggleStatus, onPress }: Props) {
+export function SessionCard({ session, onToggleStatus }: Props) {
   const isComplete = session.status === "completed";
   return (
     <Pressable
-      onPress={onPress}
+      onPress={onToggleStatus}
       className="flex-row items-center py-3 active:opacity-70"
     >
       <View
@@ -29,9 +28,7 @@ export function SessionCard({ session, onToggleStatus, onPress }: Props) {
           {session.duration} min
         </Text>
       </View>
-      <Pressable
-        onPress={onToggleStatus}
-        hitSlop={12}
+      <View
         className="h-6 w-6 rounded-full items-center justify-center"
         style={{
           backgroundColor: isComplete ? "#1E3A5F" : "transparent",
@@ -40,7 +37,7 @@ export function SessionCard({ session, onToggleStatus, onPress }: Props) {
         }}
       >
         {isComplete && <Icon name="check" size={14} color="#FFFFFF" />}
-      </Pressable>
+      </View>
     </Pressable>
   );
 }

@@ -32,29 +32,33 @@ export default function Stats() {
       <ScreenHeader title="Stats" />
 
       <ScrollView className="flex-1" contentContainerClassName="pb-6">
-        <View className="flex-row gap-2 px-6 pb-4">
-          {periods.map((p) => (
-            <Pressable
-              key={p.key}
-              onPress={() => setPeriod(p.key)}
-              className="h-8 px-4 rounded-full items-center justify-center"
-              style={{
-                backgroundColor: period === p.key ? "#1E3A5F" : "transparent",
-                borderWidth: period === p.key ? 0 : 1,
-                borderColor: "#E5E7EB",
-              }}
-            >
-              <Text
-                style={{
-                  fontSize: 13,
-                  fontWeight: period === p.key ? "600" : "400",
-                  color: period === p.key ? "#FFFFFF" : "#9CA3AF",
-                }}
-              >
-                {p.label}
-              </Text>
-            </Pressable>
-          ))}
+        <View className="px-6 pb-4">
+          <View className="flex-row bg-muted rounded-full p-1 self-start">
+            {periods.map((p) => {
+              const active = period === p.key;
+              return (
+                <Pressable
+                  key={p.key}
+                  onPress={() => setPeriod(p.key)}
+                  className={
+                    active
+                      ? "bg-primary px-4 py-1.5 rounded-full"
+                      : "px-4 py-1.5 active:opacity-70"
+                  }
+                >
+                  <Text
+                    className={
+                      active
+                        ? "text-white text-xs font-semibold"
+                        : "text-muted-foreground text-xs font-medium"
+                    }
+                  >
+                    {p.label}
+                  </Text>
+                </Pressable>
+              );
+            })}
+          </View>
         </View>
 
         <View className="flex-row gap-3 px-6 pb-3">
@@ -77,7 +81,7 @@ export default function Stats() {
             <Text className="text-info text-xl font-semibold">
               {progress?.avgSpacingDays ?? 0} days
             </Text>
-            <Text className="text-info text-xs">Avg spacing</Text>
+            <Text className="text-info text-xs">Between repeats</Text>
           </View>
           <View className="flex-1 bg-success-bg rounded-xl p-3">
             <Text className="text-success text-xl font-semibold">
@@ -88,7 +92,7 @@ export default function Stats() {
         </View>
 
         <Text className="px-6 text-foreground text-sm font-semibold pb-2">
-          By Session Type
+          By Activity Type
         </Text>
         <View className="px-6 gap-3">
           {(progress?.byType ?? []).map((t) => (
