@@ -2,7 +2,6 @@ import DateTimePicker from "@react-native-community/datetimepicker";
 import { useRouter } from "expo-router";
 import { useEffect, useState } from "react";
 import {
-  Alert,
   Platform,
   Pressable,
   ScrollView,
@@ -10,6 +9,7 @@ import {
   Text,
   View,
 } from "react-native";
+import { toast } from "sonner-native";
 import { useAvailability, useSetAvailability } from "@/hooks/use-api";
 import { dayShort, formatTime12h } from "@/lib/time";
 import type { Availability } from "@/lib/types";
@@ -56,16 +56,19 @@ export default function AvailabilityEditor() {
   function handleSave() {
     for (const w of windows) {
       if (w.enabled && w.startTime >= w.endTime) {
-        Alert.alert(
-          "Invalid window",
-          `${dayShort(w.dayOfWeek)}: start time must be before end time.`,
-        );
+        toast.error("Invalid window", {
+          description: `${dayShort(w.dayOfWeek)}: start time must be before end time.`,
+        });
         return;
       }
     }
     setAvail.mutate(windows, {
-      onSuccess: () => router.back(),
-      onError: (err) => Alert.alert("Could not save", err.message),
+      onSuccess: () => {
+        toast.success("Availability saved");
+        router.back();
+      },
+      onError: (err) =>
+        toast.error("Could not save", { description: err.message }),
     });
   }
 

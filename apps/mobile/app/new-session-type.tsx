@@ -10,6 +10,7 @@ import {
   TextInput,
   View,
 } from "react-native";
+import { toast } from "sonner-native";
 import { Icon } from "@/components/icon";
 import {
   useCreateSessionType,
@@ -61,17 +62,25 @@ export default function NewSessionType() {
 
   function handleSave() {
     if (!name.trim()) {
-      Alert.alert("Name required", "Please enter a name for this session type.");
+      toast.error("Name required", {
+        description: "Please enter a name for this session type.",
+      });
       return;
     }
     const data = { name: name.trim(), category, priority, color, icon };
-    const onDone = () => router.back();
-    const onError = (err: Error) => Alert.alert("Could not save", err.message);
+    const onSuccess = () => {
+      toast.success(editing ? "Session type updated" : "Session type created", {
+        description: data.name,
+      });
+      router.back();
+    };
+    const onError = (err: Error) =>
+      toast.error("Could not save", { description: err.message });
 
     if (editing && params.id) {
-      update.mutate({ id: params.id, data }, { onSuccess: onDone, onError });
+      update.mutate({ id: params.id, data }, { onSuccess, onError });
     } else {
-      create.mutate(data, { onSuccess: onDone, onError });
+      create.mutate(data, { onSuccess, onError });
     }
   }
 
@@ -87,8 +96,17 @@ export default function NewSessionType() {
           style: "destructive",
           onPress: () =>
             remove.mutate(params.id!, {
-              onSuccess: () => router.back(),
-              onError: (err) => Alert.alert("Failed", err.message),
+              onSuccess: (res) => {
+                toast.success("Session type deleted", {
+                  description:
+                    res.deletedSessions > 0
+                      ? `Also removed ${res.deletedSessions} session${res.deletedSessions === 1 ? "" : "s"}`
+                      : undefined,
+                });
+                router.back();
+              },
+              onError: (err) =>
+                toast.error("Could not delete", { description: err.message }),
             }),
         },
       ],

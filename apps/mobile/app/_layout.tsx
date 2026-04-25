@@ -8,6 +8,7 @@ import {
   SafeAreaProvider,
 } from "react-native-safe-area-context";
 import "react-native-reanimated";
+import { Toaster } from "sonner-native";
 import { Uniwind } from "uniwind";
 
 export const unstable_settings = {
@@ -52,6 +53,7 @@ export default function RootLayout() {
             <Stack.Screen name="suggestions" />
           </Stack>
           <StatusBar style="auto" />
+          <Toaster position="top-center" offset={60} />
         </QueryClientProvider>
       </SafeAreaListener>
     </SafeAreaProvider>

@@ -2,7 +2,6 @@ import DateTimePicker from "@react-native-community/datetimepicker";
 import { useLocalSearchParams, useRouter } from "expo-router";
 import { useEffect, useState } from "react";
 import {
-  Alert,
   KeyboardAvoidingView,
   Platform,
   Pressable,
@@ -11,6 +10,7 @@ import {
   TextInput,
   View,
 } from "react-native";
+import { toast } from "sonner-native";
 import { Icon } from "@/components/icon";
 import { useCreateSession, useSessionTypes } from "@/hooks/use-api";
 import { ApiError } from "@/lib/api";
@@ -37,6 +37,8 @@ export default function NewSession() {
   const createSession = useCreateSession();
 
   const [typeId, setTypeId] = useState(params.typeId ?? "");
+  const [title, setTitle] = useState("");
+  const [titleEdited, setTitleEdited] = useState(false);
   const [date, setDate] = useState(params.date ?? todayISO());
   const [startTime, setStartTime] = useState(params.startTime ?? "09:00");
   const [duration, setDuration] = useState(
@@ -53,13 +55,19 @@ export default function NewSession() {
 
   const selectedType = types.find((t) => t.id === typeId);
 
+  // Auto-fill title from session type unless user has edited it manually
+  useEffect(() => {
+    if (!titleEdited && selectedType) setTitle(selectedType.name);
+  }, [selectedType, titleEdited]);
+
   function handleSave(force = false) {
     if (!typeId) return;
+    const finalTitle = title.trim() || selectedType?.name || "Session";
     setConflicts([]);
     createSession.mutate(
       {
         sessionTypeId: typeId,
-        title: selectedType?.name ?? "Session",
+        title: finalTitle,
         date,
         startTime,
         duration,
@@ -67,12 +75,20 @@ export default function NewSession() {
         force,
       },
       {
-        onSuccess: () => router.back(),
+        onSuccess: () => {
+          toast.success("Session saved", {
+            description: `${finalTitle} on ${formatDateLong(date)} at ${formatTime12h(startTime)}`,
+          });
+          router.back();
+        },
         onError: (err) => {
           if (err instanceof ApiError && err.status === 409 && err.conflicts) {
             setConflicts(err.conflicts);
+            toast.error("Time conflict", {
+              description: "This session overlaps with an existing one.",
+            });
           } else {
-            Alert.alert("Could not save", err.message);
+            toast.error("Could not save", { description: err.message });
           }
         },
       },
@@ -132,6 +148,20 @@ export default function NewSession() {
               })}
             </View>
           </ScrollView>
+        </View>
+
+        <View className="gap-2">
+          <Text className="text-foreground text-sm font-semibold">Name</Text>
+          <TextInput
+            value={title}
+            onChangeText={(t) => {
+              setTitle(t);
+              setTitleEdited(true);
+            }}
+            placeholder={selectedType?.name ?? "Session name"}
+            placeholderTextColorClassName="accent-muted-foreground"
+            className="bg-card border border-border rounded-xl h-12 px-4 text-foreground text-base"
+          />
         </View>
 
         <View className="gap-2">

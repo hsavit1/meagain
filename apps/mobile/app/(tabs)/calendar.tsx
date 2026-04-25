@@ -1,6 +1,7 @@
 import { useRouter } from "expo-router";
 import { useMemo, useState } from "react";
 import { Pressable, ScrollView, Text, View } from "react-native";
+import { toast } from "sonner-native";
 import { Icon } from "@/components/icon";
 import { ScreenHeader } from "@/components/screen-header";
 import { SessionCard } from "@/components/session-card";
@@ -123,17 +124,24 @@ export default function Calendar() {
                     >
                       <SessionCard
                         session={s}
-                        onToggleStatus={() =>
-                          updateSession.mutate({
-                            id: s.id,
-                            data: {
-                              status:
-                                s.status === "completed"
-                                  ? "scheduled"
-                                  : "completed",
+                        onToggleStatus={() => {
+                          const next =
+                            s.status === "completed"
+                              ? "scheduled"
+                              : "completed";
+                          updateSession.mutate(
+                            { id: s.id, data: { status: next } },
+                            {
+                              onSuccess: () =>
+                                toast.success(
+                                  next === "completed"
+                                    ? "Marked complete"
+                                    : "Marked scheduled",
+                                  { description: s.title },
+                                ),
                             },
-                          })
-                        }
+                          );
+                        }}
                       />
                     </View>
                   ))}

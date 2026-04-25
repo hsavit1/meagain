@@ -1,8 +1,10 @@
 import { useRouter } from "expo-router";
-import { Alert, Pressable, ScrollView, Text, View } from "react-native";
+import { Pressable, ScrollView, Text, View } from "react-native";
+import { toast } from "sonner-native";
 import { ScreenHeader } from "@/components/screen-header";
 import { SuggestionCard } from "@/components/suggestion-card";
 import { useCreateSession, useSuggestions } from "@/hooks/use-api";
+import { formatDateLong, formatTime12h } from "@/lib/time";
 
 export default function SuggestionsScreen() {
   const router = useRouter();
@@ -20,10 +22,14 @@ export default function SuggestionsScreen() {
       },
       {
         onSuccess: () => {
+          toast.success("Session scheduled", {
+            description: `${s.sessionType.name} on ${formatDateLong(s.date)} at ${formatTime12h(s.startTime)}`,
+          });
           refetch();
           router.back();
         },
-        onError: (err) => Alert.alert("Could not save", err.message),
+        onError: (err) =>
+          toast.error("Could not save", { description: err.message }),
       },
     );
   }
