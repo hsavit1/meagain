@@ -1,0 +1,10 @@
+{
+  "version": 1,
+  "skills": {
+    "pencil-design": {
+      "source": "chiroro-jr/pencil-design-skill",
+      "sourceType": "github",
+      "computedHash": "e898f789a2fdf7eceace95294be4601aa7a2699aeefbb16a741c1ee78d208856"
+    }
+  }
+}
