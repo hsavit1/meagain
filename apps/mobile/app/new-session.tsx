@@ -13,10 +13,16 @@ import {
 } from "react-native";
 import { toast } from "sonner-native";
 import { Icon } from "@/components/icon";
-import { useCreateSession, useSessionTypes } from "@/hooks/use-api";
+import {
+  useAvailability,
+  useCreateSession,
+  useSessionTypes,
+} from "@/hooks/use-api";
 import { ApiError } from "@/lib/api";
 import {
   addMinutes,
+  dayLong,
+  dayOfWeekISO,
   formatDateLong,
   formatTime12h,
   todayISO,
@@ -35,6 +41,7 @@ export default function NewSession() {
   }>();
 
   const { data: types = [] } = useSessionTypes();
+  const { data: availability = [] } = useAvailability();
   const createSession = useCreateSession();
 
   const [typeId, setTypeId] = useState(params.typeId ?? "");
@@ -64,6 +71,26 @@ export default function NewSession() {
   }, [types]);
 
   const selectedType = types.find((t) => t.id === typeId);
+
+  const activityEnd = addMinutes(startTime, duration);
+  const dow = dayOfWeekISO(date);
+  const window = availability.find((a) => a.dayOfWeek === dow);
+  const availabilityWarning: { kind: "noWindow" | "outside"; message: string } | null =
+    !window || !window.enabled
+      ? {
+          kind: "noWindow",
+          message: `${dayLong(dow)}s are marked unavailable in your weekly hours.`,
+        }
+      : startTime < window.startTime || activityEnd > window.endTime
+        ? {
+            kind: "outside",
+            message: `Your ${dayLong(dow)} hours are ${formatTime12h(
+              window.startTime,
+            )}–${formatTime12h(window.endTime)}; this activity runs ${formatTime12h(
+              startTime,
+            )}–${formatTime12h(activityEnd)}.`,
+          }
+        : null;
 
   function handleSave(force = false) {
     if (!typeId) return;
@@ -314,6 +341,28 @@ export default function NewSession() {
           />
         </View>
 
+        {availabilityWarning && (
+          <View className="bg-info-bg rounded-xl p-4 flex-row gap-3">
+            <Icon name="timer" size={18} colorVar="--color-info" />
+            <View className="flex-1">
+              <Text className="text-info text-sm font-semibold">
+                Outside availability
+              </Text>
+              <Text className="text-info text-xs mt-0.5 leading-4">
+                {availabilityWarning.message} You can still save it.
+              </Text>
+              <Pressable
+                onPress={() => router.push("/availability")}
+                className="mt-2 self-start"
+              >
+                <Text className="text-info text-xs font-semibold underline">
+                  Edit weekly hours
+                </Text>
+              </Pressable>
+            </View>
+          </View>
+        )}
+
         {conflicts.length > 0 && (
           <View className="bg-warning-bg border border-warning-border rounded-xl p-4 flex-row gap-3">
             <Icon name="triangle-alert" size={18} colorVar="--color-warning" />
@@ -321,9 +370,12 @@ export default function NewSession() {
               <Text className="text-warning text-sm font-semibold">
                 Time conflict
               </Text>
+              <Text className="text-warning text-xs mt-0.5">
+                Pick a different time, or save anyway to keep the overlap.
+              </Text>
               {conflicts.map((c) => (
                 <Text key={c.id} className="text-warning text-xs mt-0.5">
-                  Overlaps with {c.title} ({formatTime12h(c.startTime)}–
+                  · Overlaps with {c.title} ({formatTime12h(c.startTime)}–
                   {formatTime12h(c.endTime)})
                 </Text>
               ))}
