@@ -36,15 +36,14 @@ export default function Calendar() {
     { month: "long", year: "numeric", timeZone: "UTC" },
   );
 
-  const grouped = useMemo(() => {
-    const m = new Map<string, typeof sessionsQ.data>();
-    for (const s of sessionsQ.data ?? []) {
-      const arr = m.get(s.date) ?? [];
-      arr.push(s);
-      m.set(s.date, arr);
-    }
-    return m;
-  }, [sessionsQ.data]);
+  const sessionsForSelected = useMemo(
+    () => (sessionsQ.data ?? []).filter((s) => s.date === selectedDate),
+    [sessionsQ.data, selectedDate],
+  );
+
+  function shiftWeek(direction: -1 | 1) {
+    setSelectedDate((d) => addDaysISO(d, direction * 7));
+  }
 
   return (
     <View className="flex-1 bg-background pt-safe">
@@ -53,6 +52,40 @@ export default function Calendar() {
         subtitle={monthLabel}
         rightAction={{ icon: "plus", onPress: () => router.push("/new-session") }}
       />
+
+      <View className="flex-row items-center justify-between px-6 pb-1">
+        <Pressable
+          onPress={() => shiftWeek(-1)}
+          hitSlop={12}
+          className="h-8 w-8 rounded-full items-center justify-center active:opacity-60"
+        >
+          <Icon
+            name="chevron-left"
+            size={18}
+            colorVar="--color-muted-foreground"
+          />
+        </Pressable>
+        <Pressable
+          onPress={() => setSelectedDate(today)}
+          hitSlop={12}
+          className="active:opacity-60"
+        >
+          <Text className="text-muted-foreground text-xs font-medium">
+            Today
+          </Text>
+        </Pressable>
+        <Pressable
+          onPress={() => shiftWeek(1)}
+          hitSlop={12}
+          className="h-8 w-8 rounded-full items-center justify-center active:opacity-60"
+        >
+          <Icon
+            name="chevron-right"
+            size={18}
+            colorVar="--color-muted-foreground"
+          />
+        </Pressable>
+      </View>
 
       <View className="flex-row justify-between px-4 py-2">
         {weekDates.map((d) => {
@@ -103,57 +136,62 @@ export default function Calendar() {
       <View className="h-px bg-border" />
 
       <ScrollView className="flex-1" contentContainerClassName="px-6 pt-4 pb-6">
-        {weekDates.map((date) => {
-          const list = grouped.get(date) ?? [];
-          if (list.length === 0 && date !== selectedDate) return null;
-          return (
-            <View key={date} className="mb-5">
-              <Text className="text-muted-foreground text-xs font-semibold mb-1 tracking-wide">
-                {date === today ? "TODAY" : ""} · {formatDateLong(date)}
-              </Text>
-              {list.length === 0 ? (
-                <Text className="text-muted-foreground text-sm py-2">
-                  No sessions
-                </Text>
-              ) : (
-                <View className="bg-card border border-border rounded-2xl px-4 py-1">
-                  {list.map((s, i) => (
-                    <View
-                      key={s.id}
-                      className={i > 0 ? "border-t border-border" : ""}
-                    >
-                      <SessionCard
-                        session={s}
-                        onToggleStatus={() => {
-                          const next =
-                            s.status === "completed"
-                              ? "scheduled"
-                              : "completed";
-                          updateSession.mutate(
-                            { id: s.id, data: { status: next } },
-                            {
-                              onSuccess: () =>
-                                toast.success(
-                                  next === "completed"
-                                    ? "Marked complete"
-                                    : "Marked scheduled",
-                                  { description: s.title },
-                                ),
-                            },
-                          );
-                        }}
-                      />
-                    </View>
-                  ))}
-                </View>
-              )}
+        <Text className="text-muted-foreground text-xs font-semibold mb-2 tracking-wide">
+          {selectedDate === today ? "TODAY · " : ""}
+          {formatDateLong(selectedDate).toUpperCase()}
+        </Text>
+
+        {sessionsForSelected.length === 0 ? (
+          <View className="bg-card border border-border rounded-2xl py-8 items-center">
+            <View className="h-12 w-12 rounded-full bg-muted items-center justify-center mb-3">
+              <Icon name="calendar" size={20} colorVar="--color-muted-foreground" />
             </View>
-          );
-        })}
+            <Text className="text-foreground text-sm font-medium">
+              No sessions
+            </Text>
+            <Text className="text-muted-foreground text-xs mt-1">
+              Tap + to schedule one
+            </Text>
+          </View>
+        ) : (
+          <View className="bg-card border border-border rounded-2xl px-4 py-1">
+            {sessionsForSelected.map((s, i) => (
+              <View
+                key={s.id}
+                className={i > 0 ? "border-t border-border" : ""}
+              >
+                <SessionCard
+                  session={s}
+                  onToggleStatus={() => {
+                    const next =
+                      s.status === "completed" ? "scheduled" : "completed";
+                    updateSession.mutate(
+                      { id: s.id, data: { status: next } },
+                      {
+                        onSuccess: () =>
+                          toast.success(
+                            next === "completed"
+                              ? "Marked complete"
+                              : "Marked scheduled",
+                            { description: s.title },
+                          ),
+                      },
+                    );
+                  }}
+                />
+              </View>
+            ))}
+          </View>
+        )}
       </ScrollView>
 
       <Pressable
-        onPress={() => router.push("/new-session")}
+        onPress={() =>
+          router.push({
+            pathname: "/new-session",
+            params: { date: selectedDate },
+          })
+        }
         className="absolute h-14 w-14 rounded-full bg-primary items-center justify-center active:opacity-80"
         style={{
           right: 24,
