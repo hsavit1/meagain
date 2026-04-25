@@ -37,8 +37,6 @@ export default function NewSession() {
   const createSession = useCreateSession();
 
   const [typeId, setTypeId] = useState(params.typeId ?? "");
-  const [title, setTitle] = useState("");
-  const [titleEdited, setTitleEdited] = useState(false);
   const [date, setDate] = useState(params.date ?? todayISO());
   const [startTime, setStartTime] = useState(params.startTime ?? "09:00");
   const [duration, setDuration] = useState(
@@ -55,19 +53,14 @@ export default function NewSession() {
 
   const selectedType = types.find((t) => t.id === typeId);
 
-  // Auto-fill title from session type unless user has edited it manually
-  useEffect(() => {
-    if (!titleEdited && selectedType) setTitle(selectedType.name);
-  }, [selectedType, titleEdited]);
-
   function handleSave(force = false) {
     if (!typeId) return;
-    const finalTitle = title.trim() || selectedType?.name || "Session";
+    const title = selectedType?.name ?? "Session";
     setConflicts([]);
     createSession.mutate(
       {
         sessionTypeId: typeId,
-        title: finalTitle,
+        title,
         date,
         startTime,
         duration,
@@ -77,7 +70,7 @@ export default function NewSession() {
       {
         onSuccess: () => {
           toast.success("Session saved", {
-            description: `${finalTitle} on ${formatDateLong(date)} at ${formatTime12h(startTime)}`,
+            description: `${title} on ${formatDateLong(date)} at ${formatTime12h(startTime)}`,
           });
           router.back();
         },
@@ -117,6 +110,13 @@ export default function NewSession() {
           </Text>
           <ScrollView horizontal showsHorizontalScrollIndicator={false}>
             <View className="flex-row gap-2">
+              <Pressable
+                onPress={() => router.push("/new-session-type")}
+                className="rounded-full h-9 w-9 items-center justify-center bg-card active:opacity-70"
+                style={{ borderWidth: 1, borderColor: "#E5E7EB" }}
+              >
+                <Icon name="plus" size={16} colorVar="--color-primary" />
+              </Pressable>
               {types.map((t) => {
                 const active = t.id === typeId;
                 return (
@@ -148,20 +148,6 @@ export default function NewSession() {
               })}
             </View>
           </ScrollView>
-        </View>
-
-        <View className="gap-2">
-          <Text className="text-foreground text-sm font-semibold">Name</Text>
-          <TextInput
-            value={title}
-            onChangeText={(t) => {
-              setTitle(t);
-              setTitleEdited(true);
-            }}
-            placeholder={selectedType?.name ?? "Session name"}
-            placeholderTextColorClassName="accent-muted-foreground"
-            className="bg-card border border-border rounded-xl h-12 px-4 text-foreground text-base"
-          />
         </View>
 
         <View className="gap-2">
