@@ -3,6 +3,7 @@ import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { Stack } from "expo-router";
 import { StatusBar } from "expo-status-bar";
 import { useState } from "react";
+import { GestureHandlerRootView } from "react-native-gesture-handler";
 import {
   SafeAreaListener,
   SafeAreaProvider,
@@ -29,33 +30,35 @@ export default function RootLayout() {
   );
 
   return (
-    <SafeAreaProvider>
-      <SafeAreaListener
-        onChange={({ insets }) => {
-          Uniwind.updateInsets(insets);
-        }}
-      >
-        <QueryClientProvider client={queryClient}>
-          <Stack screenOptions={{ headerShown: false }}>
-            <Stack.Screen name="(tabs)" />
-            <Stack.Screen
-              name="new-session"
-              options={{ presentation: "modal" }}
-            />
-            <Stack.Screen
-              name="new-session-type"
-              options={{ presentation: "modal" }}
-            />
-            <Stack.Screen
-              name="availability"
-              options={{ presentation: "modal" }}
-            />
-            <Stack.Screen name="suggestions" />
-          </Stack>
-          <StatusBar style="auto" />
-          <Toaster position="top-center" offset={60} />
-        </QueryClientProvider>
-      </SafeAreaListener>
-    </SafeAreaProvider>
+    <GestureHandlerRootView style={{ flex: 1 }}>
+      <SafeAreaProvider>
+        <SafeAreaListener
+          onChange={({ insets }) => {
+            Uniwind.updateInsets(insets);
+          }}
+        >
+          <QueryClientProvider client={queryClient}>
+            <Stack screenOptions={{ headerShown: false }}>
+              <Stack.Screen name="(tabs)" />
+              <Stack.Screen
+                name="new-session"
+                options={{ presentation: "modal" }}
+              />
+              <Stack.Screen
+                name="new-session-type"
+                options={{ presentation: "modal" }}
+              />
+              <Stack.Screen
+                name="availability"
+                options={{ presentation: "modal" }}
+              />
+              <Stack.Screen name="suggestions" />
+            </Stack>
+            <StatusBar style="auto" />
+            <Toaster position="top-center" offset={60} />
+          </QueryClientProvider>
+        </SafeAreaListener>
+      </SafeAreaProvider>
+    </GestureHandlerRootView>
   );
 }
