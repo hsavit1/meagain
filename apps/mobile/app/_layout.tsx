@@ -11,6 +11,9 @@ import {
 import "react-native-reanimated";
 import { Toaster } from "sonner-native";
 import { Uniwind } from "uniwind";
+import { loadInitialThemePreference } from "@/hooks/use-theme-preference";
+
+loadInitialThemePreference();
 
 export const unstable_settings = {
   anchor: "(tabs)",

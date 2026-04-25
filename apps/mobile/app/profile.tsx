@@ -5,13 +5,34 @@ import { toast } from "sonner-native";
 import { Icon } from "@/components/icon";
 import { ScreenHeader } from "@/components/screen-header";
 import { usePersonas, useSeedPersona } from "@/hooks/use-api";
+import {
+  type ThemePreference,
+  useThemePreference,
+} from "@/hooks/use-theme-preference";
 import type { Persona } from "@/lib/types";
+
+const THEME_OPTIONS: Array<{
+  key: ThemePreference;
+  label: string;
+  icon: string;
+  description: string;
+}> = [
+  {
+    key: "system",
+    label: "System",
+    icon: "smartphone",
+    description: "Match your device setting",
+  },
+  { key: "light", label: "Light", icon: "sun", description: "Always light" },
+  { key: "dark", label: "Dark", icon: "moon", description: "Always dark" },
+];
 
 export default function Profile() {
   const router = useRouter();
   const personasQ = usePersonas();
   const seedMut = useSeedPersona();
   const [confirming, setConfirming] = useState<Persona | null>(null);
+  const { preference, setPreference } = useThemePreference();
 
   function runSeed(persona: Persona) {
     seedMut.mutate(persona, {
@@ -38,6 +59,47 @@ export default function Profile() {
           <Text className="text-foreground text-xl font-medium">You</Text>
           <Text className="text-muted-foreground text-xs mt-0.5">
             Smart Session Planner
+          </Text>
+        </View>
+
+        <Text className="px-6 text-muted-foreground text-xs font-semibold tracking-wide pb-2">
+          APPEARANCE
+        </Text>
+        <View className="px-4 pb-6">
+          <View className="bg-card border border-border rounded-2xl flex-row p-1 gap-1">
+            {THEME_OPTIONS.map((opt) => {
+              const active = preference === opt.key;
+              return (
+                <Pressable
+                  key={opt.key}
+                  onPress={() => setPreference(opt.key)}
+                  className="flex-1 rounded-xl py-2.5 items-center gap-1 active:opacity-80"
+                  style={{
+                    backgroundColor: active ? "#1E3A5F" : "transparent",
+                  }}
+                >
+                  <Icon
+                    name={opt.icon}
+                    size={18}
+                    color={active ? "#FFFFFF" : undefined}
+                    colorVar="--color-muted-foreground"
+                  />
+                  <Text
+                    style={{
+                      fontSize: 13,
+                      fontWeight: active ? "600" : "500",
+                      color: active ? "#FFFFFF" : undefined,
+                    }}
+                    className={active ? "" : "text-foreground"}
+                  >
+                    {opt.label}
+                  </Text>
+                </Pressable>
+              );
+            })}
+          </View>
+          <Text className="text-muted-foreground text-xs mt-2 px-1">
+            {THEME_OPTIONS.find((o) => o.key === preference)?.description}
           </Text>
         </View>
 
