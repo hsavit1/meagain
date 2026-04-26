@@ -10,6 +10,12 @@ Take-home project: an end-to-end mobile app for managing session types, weekly a
 - **API spec**: [`plans/02-api-routes.md`](./plans/02-api-routes.md)
 - **Suggestion algorithm**: [`plans/03-suggestion-algorithm.md`](./plans/03-suggestion-algorithm.md)
 
+## Demo
+
+A short walkthrough recorded on the iOS Simulator: [`media/demo.mov`](./media/demo.mov).
+
+<video src="https://github.com/hsavit1/meagain/raw/main/media/demo.mov" controls width="320"></video>
+
 ## Prerequisites
 
 - [Bun](https://bun.sh) ≥ 1.3
